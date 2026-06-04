@@ -1,0 +1,10 @@
+#Laravel
+/be_rt/node_modules
+/be_rt/.env
+/be_rt/vendor
+/be_rt/storage
+/be_rt/bootstrap/cache
+
+#React
+/fe_rt/node_modules
+/fe_rt/.env

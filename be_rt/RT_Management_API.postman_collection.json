@@ -1,0 +1,655 @@
+{
+	"info": {
+		"_postman_id": "rt-management-api-collection",
+		"name": "RT Management API",
+		"description": "Koleksi API untuk Sistem Manajemen RT. Mencakup pengelolaan Warga, Rumah & Histori Penghuni, serta Keuangan (Iuran & Pengeluaran).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api",
+			"type": "string",
+			"description": "Base URL API Laravel. Sesuaikan jika port berbeda."
+		}
+	],
+	"item": [
+		{
+			"name": "1. Warga",
+			"description": "Endpoint pengelolaan data Warga/Penghuni RT (Kriteria 1). Menggunakan apiResource sehingga mendukung CRUD penuh.",
+			"item": [
+				{
+					"name": "GET - Daftar Semua Warga",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/warga",
+							"host": ["{{base_url}}"],
+							"path": ["warga"]
+						},
+						"description": "Menampilkan seluruh data warga yang terdaftar di sistem RT."
+					},
+					"response": [
+						{
+							"name": "Success - Daftar Warga",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"nama_lengkap\": \"Budi Santoso\",\n            \"foto_ktp\": \"uploads/ktp/abc123.jpg\",\n            \"status_warga\": \"tetap\",\n            \"nomor_telepon\": \"081234567890\",\n            \"status_pernikahan\": \"menikah\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "POST - Tambah Warga Baru",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "nama_lengkap",
+									"value": "Budi Santoso",
+									"type": "text",
+									"description": "Nama lengkap warga (wajib)"
+								},
+								{
+									"key": "foto_ktp",
+									"type": "file",
+									"src": [],
+									"description": "File foto KTP (wajib). Format: jpeg, png, jpg. Maks: 2MB"
+								},
+								{
+									"key": "status_warga",
+									"value": "tetap",
+									"type": "text",
+									"description": "Status warga. Pilihan: tetap | kontrak"
+								},
+								{
+									"key": "nomor_telepon",
+									"value": "081234567890",
+									"type": "text",
+									"description": "Nomor telepon (maks 15 karakter)"
+								},
+								{
+									"key": "status_pernikahan",
+									"value": "menikah",
+									"type": "text",
+									"description": "Status pernikahan. Pilihan: menikah | belum_menikah"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/warga",
+							"host": ["{{base_url}}"],
+							"path": ["warga"]
+						},
+						"description": "Mendaftarkan warga baru ke sistem. Request body menggunakan form-data karena ada upload file foto KTP."
+					},
+					"response": [
+						{
+							"name": "201 - Warga Berhasil Ditambahkan",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Warga berhasil ditambahkan\",\n    \"data\": {\n        \"id\": 1,\n        \"nama_lengkap\": \"Budi Santoso\",\n        \"foto_ktp\": \"uploads/ktp/abc123.jpg\",\n        \"status_warga\": \"tetap\",\n        \"nomor_telepon\": \"081234567890\",\n        \"status_pernikahan\": \"menikah\"\n    }\n}"
+						},
+						{
+							"name": "422 - Validasi Gagal",
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"The nama_lengkap field is required.\",\n    \"errors\": {\n        \"nama_lengkap\": [\"The nama_lengkap field is required.\"],\n        \"foto_ktp\": [\"The foto_ktp field is required.\"]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "GET - Detail Warga by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/warga/1",
+							"host": ["{{base_url}}"],
+							"path": ["warga", "1"]
+						},
+						"description": "Menampilkan detail data satu warga berdasarkan ID."
+					},
+					"response": [
+						{
+							"name": "200 - Data Warga Ditemukan",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"data\": {\n        \"id\": 1,\n        \"nama_lengkap\": \"Budi Santoso\",\n        \"foto_ktp\": \"uploads/ktp/abc123.jpg\",\n        \"status_warga\": \"tetap\",\n        \"nomor_telepon\": \"081234567890\",\n        \"status_pernikahan\": \"menikah\"\n    }\n}"
+						},
+						{
+							"name": "404 - Warga Tidak Ditemukan",
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"No query results for model [App\\\\Models\\\\Warga] 99\"\n}"
+						}
+					]
+				},
+				{
+					"name": "POST - Update Data Warga (PUT with form-data)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "_method",
+									"value": "PUT",
+									"type": "text",
+									"description": "Spoofing method karena form-data tidak support PUT. Gunakan nilai PUT."
+								},
+								{
+									"key": "nama_lengkap",
+									"value": "Budi Santoso Updated",
+									"type": "text"
+								},
+								{
+									"key": "foto_ktp",
+									"type": "file",
+									"src": [],
+									"description": "Opsional jika ingin mengganti foto KTP"
+								},
+								{
+									"key": "status_warga",
+									"value": "kontrak",
+									"type": "text",
+									"description": "Pilihan: tetap | kontrak"
+								},
+								{
+									"key": "nomor_telepon",
+									"value": "089876543210",
+									"type": "text"
+								},
+								{
+									"key": "status_pernikahan",
+									"value": "belum_menikah",
+									"type": "text",
+									"description": "Pilihan: menikah | belum_menikah"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/warga/1",
+							"host": ["{{base_url}}"],
+							"path": ["warga", "1"]
+						},
+						"description": "Memperbarui data warga. Gunakan POST dengan field `_method=PUT` karena upload file tidak bisa melalui PUT langsung di beberapa client. Foto KTP lama akan dihapus otomatis jika diganti."
+					},
+					"response": [
+						{
+							"name": "200 - Data Warga Berhasil Diubah",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Data warga berhasil diubah\",\n    \"data\": {\n        \"id\": 1,\n        \"nama_lengkap\": \"Budi Santoso Updated\",\n        \"foto_ktp\": \"uploads/ktp/newfile.jpg\",\n        \"status_warga\": \"kontrak\",\n        \"nomor_telepon\": \"089876543210\",\n        \"status_pernikahan\": \"belum_menikah\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "DELETE - Hapus Warga",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/warga/1",
+							"host": ["{{base_url}}"],
+							"path": ["warga", "1"]
+						},
+						"description": "Menghapus data warga beserta foto KTP-nya dari storage."
+					},
+					"response": [
+						{
+							"name": "200 - Warga Berhasil Dihapus",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Warga berhasil dihapus\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "2. Rumah & Histori Penghuni",
+			"description": "Endpoint pengelolaan unit rumah, pergantian penghuni, dan histori hunian (Kriteria 2).",
+			"item": [
+				{
+					"name": "GET - Daftar Semua Rumah",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rumah",
+							"host": ["{{base_url}}"],
+							"path": ["rumah"]
+						},
+						"description": "Menampilkan seluruh daftar rumah beserta status hunian dan data penghuni aktif saat ini."
+					},
+					"response": [
+						{
+							"name": "200 - Daftar Rumah Berhasil",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"nomor_rumah\": \"A01\",\n            \"status_rumah\": \"dihuni\",\n            \"penghuni_aktif\": {\n                \"id\": 1,\n                \"rumah_id\": 1,\n                \"warga_id\": 1,\n                \"tanggal_masuk\": \"2024-01-01\",\n                \"tanggal_keluar\": null,\n                \"warga\": {\n                    \"id\": 1,\n                    \"nama_lengkap\": \"Budi Santoso\"\n                }\n            }\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "POST - Tambah Unit Rumah Baru",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nomor_rumah\": \"A05\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/rumah",
+							"host": ["{{base_url}}"],
+							"path": ["rumah"]
+						},
+						"description": "Menambah unit rumah baru ke sistem. Nomor rumah harus unik. Status awal rumah otomatis `tidak_dihuni`."
+					},
+					"response": [
+						{
+							"name": "201 - Rumah Berhasil Ditambahkan",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"data\": {\n        \"id\": 5,\n        \"nomor_rumah\": \"A05\",\n        \"status_rumah\": \"tidak_dihuni\"\n    }\n}"
+						},
+						{
+							"name": "422 - Nomor Rumah Sudah Ada",
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"The nomor rumah has already been taken.\",\n    \"errors\": {\n        \"nomor_rumah\": [\"The nomor rumah has already been taken.\"]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "POST - Set / Ganti Penghuni Rumah",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"warga_id\": 2,\n    \"tanggal_masuk\": \"2024-06-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/rumah/1/set-penghuni",
+							"host": ["{{base_url}}"],
+							"path": ["rumah", "1", "set-penghuni"]
+						},
+						"description": "Mendaftarkan atau mengganti penghuni suatu rumah. Jika rumah sudah dihuni, penghuni lama akan otomatis di-set tanggal_keluar = tanggal_masuk baru - 1 hari."
+					},
+					"response": [
+						{
+							"name": "200 - Penghuni Berhasil Diperbarui",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Penghuni rumah berhasil diperbarui\"\n}"
+						},
+						{
+							"name": "422 - Validasi Gagal",
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"The selected warga_id is invalid.\",\n    \"errors\": {\n        \"warga_id\": [\"The selected warga_id is invalid.\"]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "POST - Kosongkan Rumah (Penghuni Keluar)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tanggal_keluar\": \"2024-12-31\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/rumah/1/kosongkan",
+							"host": ["{{base_url}}"],
+							"path": ["rumah", "1", "kosongkan"]
+						},
+						"description": "Mengosongkan rumah ketika penghuni pindah atau keluar. Status rumah akan berubah menjadi `tidak_dihuni` dan tanggal_keluar pada histori penghuni akan diisi."
+					},
+					"response": [
+						{
+							"name": "200 - Rumah Berhasil Dikosongkan",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Rumah berhasil dikosongkan\"\n}"
+						}
+					]
+				},
+				{
+					"name": "GET - Histori Penghuni Rumah",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rumah/1/histori-penghuni",
+							"host": ["{{base_url}}"],
+							"path": ["rumah", "1", "histori-penghuni"]
+						},
+						"description": "Menampilkan seluruh riwayat penghuni yang pernah menempati suatu rumah, diurutkan dari yang terbaru."
+					},
+					"response": [
+						{
+							"name": "200 - Histori Penghuni Berhasil",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"data\": [\n        {\n            \"id\": 3,\n            \"rumah_id\": 1,\n            \"warga_id\": 2,\n            \"tanggal_masuk\": \"2024-06-01\",\n            \"tanggal_keluar\": null,\n            \"warga\": {\n                \"id\": 2,\n                \"nama_lengkap\": \"Siti Rahayu\"\n            }\n        },\n        {\n            \"id\": 1,\n            \"rumah_id\": 1,\n            \"warga_id\": 1,\n            \"tanggal_masuk\": \"2024-01-01\",\n            \"tanggal_keluar\": \"2024-05-31\",\n            \"warga\": {\n                \"id\": 1,\n                \"nama_lengkap\": \"Budi Santoso\"\n            }\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "3. Keuangan",
+			"description": "Endpoint pengelolaan keuangan RT: pembayaran iuran, pencatatan pengeluaran, histori pembayaran, dan laporan keuangan (Kriteria 3).",
+			"item": [
+				{
+					"name": "POST - Bayar Iuran Warga",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rumah_id\": 1,\n    \"jenis_iuran\": \"satpam\",\n    \"bulan_mulai\": 1,\n    \"tahun\": 2024,\n    \"durasi_bulan\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/keuangan/bayar-iuran",
+							"host": ["{{base_url}}"],
+							"path": ["keuangan", "bayar-iuran"]
+						},
+						"description": "Mencatat pembayaran iuran warga.\n\n**Jenis Iuran & Tarif:**\n- `satpam` → Rp 100.000/bulan\n- `kebersihan` → Rp 15.000/bulan\n\n**Fitur `durasi_bulan`:** Bisa membayar lebih dari satu bulan sekaligus (maks. 12 bulan/setahun penuh). Bulan yang sudah lunas akan dilewati otomatis.\n\n**Catatan:** Rumah harus memiliki penghuni aktif, jika tidak sistem akan menolak pembayaran."
+					},
+					"response": [
+						{
+							"name": "200 - Iuran Berhasil Dicatat",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Pembayaran iuran berhasil dicatat\",\n    \"total_bulan_dibayar\": 3\n}"
+						},
+						{
+							"name": "420 - Rumah Kosong, Tidak Bisa Bayar",
+							"status": "Method Failure",
+							"code": 420,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"error\",\n    \"message\": \"Rumah ini sedang kosong, tidak bisa menerima pembayaran iuran.\"\n}"
+						},
+						{
+							"name": "422 - Validasi Gagal",
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"The jenis iuran field must be one of satpam, kebersihan.\",\n    \"errors\": {\n        \"jenis_iuran\": [\"The jenis iuran field must be one of satpam, kebersihan.\"]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "POST - Tambah Pengeluaran RT",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deskripsi\": \"Pembelian Cat Pagar RT\",\n    \"nominal\": 350000,\n    \"tanggal_pengeluaran\": \"2024-06-04\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/keuangan/pengeluaran",
+							"host": ["{{base_url}}"],
+							"path": ["keuangan", "pengeluaran"]
+						},
+						"description": "Mencatat pengeluaran kas RT, seperti pembelian perlengkapan, biaya kebersihan, dll."
+					},
+					"response": [
+						{
+							"name": "201 - Pengeluaran Berhasil Dicatat",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"message\": \"Pengeluaran RT berhasil dicatat\",\n    \"data\": {\n        \"id\": 1,\n        \"deskripsi\": \"Pembelian Cat Pagar RT\",\n        \"nominal\": 350000,\n        \"tanggal_pengeluaran\": \"2024-06-04\"\n    }\n}"
+						},
+						{
+							"name": "422 - Validasi Gagal",
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"The nominal field must be a number.\",\n    \"errors\": {\n        \"nominal\": [\"The nominal field must be a number.\"]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "GET - Histori Pembayaran per Rumah",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rumah/1/histori-pembayaran",
+							"host": ["{{base_url}}"],
+							"path": ["rumah", "1", "histori-pembayaran"]
+						},
+						"description": "Menampilkan seluruh histori pembayaran iuran untuk satu rumah tertentu, diurutkan dari tahun dan bulan terbaru."
+					},
+					"response": [
+						{
+							"name": "200 - Histori Pembayaran Berhasil",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"rumah_id\": 1,\n            \"warga_id\": 2,\n            \"jenis_iuran\": \"satpam\",\n            \"bulan\": 6,\n            \"tahun\": 2024,\n            \"jumlah_bayar\": 100000,\n            \"status_pembayaran\": \"lunas\",\n            \"tanggal_bayar\": \"2024-06-04T10:00:00.000000Z\",\n            \"warga\": {\n                \"id\": 2,\n                \"nama_lengkap\": \"Siti Rahayu\"\n            }\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET - Report Summary Keuangan Tahunan",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/keuangan/report-summary?tahun=2024",
+							"host": ["{{base_url}}"],
+							"path": ["keuangan", "report-summary"],
+							"query": [
+								{
+									"key": "tahun",
+									"value": "2024",
+									"description": "Tahun laporan (opsional, default: tahun berjalan)"
+								}
+							]
+						},
+						"description": "Menampilkan rekap keuangan tahunan beserta data chart per bulan (Januari-Desember).\n\nMencakup:\n- Total pemasukan setahun\n- Total pengeluaran setahun\n- Sisa saldo kas\n- Data chart bulanan (pemasukan, pengeluaran, saldo per bulan)"
+					},
+					"response": [
+						{
+							"name": "200 - Report Summary Berhasil",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"summary\": {\n        \"tahun\": 2024,\n        \"total_pemasukan\": 1150000,\n        \"total_pengeluaran\": 350000,\n        \"sisa_saldo_kas\": 800000\n    },\n    \"chart_data\": [\n        {\n            \"bulan\": 1,\n            \"nama_bulan\": \"Januari\",\n            \"pemasukan\": 115000,\n            \"pengeluaran\": 0,\n            \"saldo_bulan_ini\": 115000\n        },\n        {\n            \"bulan\": 6,\n            \"nama_bulan\": \"Juni\",\n            \"pemasukan\": 115000,\n            \"pengeluaran\": 350000,\n            \"saldo_bulan_ini\": -235000\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET - Report Detail Transaksi Bulanan",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/keuangan/report-detail?bulan=6&tahun=2024",
+							"host": ["{{base_url}}"],
+							"path": ["keuangan", "report-detail"],
+							"query": [
+								{
+									"key": "bulan",
+									"value": "6",
+									"description": "Bulan laporan (1-12, wajib)"
+								},
+								{
+									"key": "tahun",
+									"value": "2024",
+									"description": "Tahun laporan (4 digit, wajib)"
+								}
+							]
+						},
+						"description": "Menampilkan detail seluruh transaksi pemasukan (pembayaran iuran lunas) dan pengeluaran pada bulan dan tahun tertentu.\n\nMencakup:\n- Daftar detail pemasukan per transaksi (beserta info rumah dan warga)\n- Daftar detail pengeluaran per transaksi\n- Total pemasukan bulan tersebut\n- Total pengeluaran bulan tersebut"
+					},
+					"response": [
+						{
+							"name": "200 - Report Detail Berhasil",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"status\": \"success\",\n    \"periode\": \"Juni 2024\",\n    \"data\": {\n        \"pemasukan_detail\": [\n            {\n                \"id\": 1,\n                \"rumah_id\": 1,\n                \"warga_id\": 2,\n                \"jenis_iuran\": \"satpam\",\n                \"bulan\": 6,\n                \"tahun\": 2024,\n                \"jumlah_bayar\": 100000,\n                \"status_pembayaran\": \"lunas\",\n                \"rumah\": { \"id\": 1, \"nomor_rumah\": \"A01\" },\n                \"warga\": { \"id\": 2, \"nama_lengkap\": \"Siti Rahayu\" }\n            }\n        ],\n        \"pengeluaran_detail\": [\n            {\n                \"id\": 1,\n                \"deskripsi\": \"Pembelian Cat Pagar RT\",\n                \"nominal\": 350000,\n                \"tanggal_pengeluaran\": \"2024-06-04\"\n            }\n        ],\n        \"total_pemasukan\": 100000,\n        \"total_pengeluaran\": 350000\n    }\n}"
+						},
+						{
+							"name": "422 - Parameter Wajib Kurang",
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"message\": \"The bulan field is required.\",\n    \"errors\": {\n        \"bulan\": [\"The bulan field is required.\"],\n        \"tahun\": [\"The tahun field is required.\"]\n    }\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}
