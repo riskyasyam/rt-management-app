@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Home, UserPlus, DoorOpen, History, Calendar, Search, ChevronRight } from 'lucide-react'
+import { Plus, Home, UserPlus, DoorOpen, History, Calendar, Search, ChevronRight, Receipt } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { rumahApi, wargaApi } from '@/lib/api'
 import { useToast } from '@/components/ui/toast'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatCurrency, BULAN_NAMES } from '@/lib/utils'
 
 function FormRow({ label, children, hint }) {
   return (
@@ -34,10 +34,13 @@ export default function RumahPage() {
   const [setPenghuniOpen, setSetPenghuniOpen] = useState(false)
   const [kosongkanOpen,   setKosongkanOpen]   = useState(false)
   const [historiOpen,     setHistoriOpen]     = useState(false)
+  const [rekapBayarOpen,  setRekapBayarOpen]  = useState(false)
 
   const [selectedRumah, setSelectedRumah] = useState(null)
-  const [histori,       setHistori]       = useState([])
-  const [historiLoading, setHistoriLoading] = useState(false)
+  const [histori,        setHistori]        = useState([])
+  const [historiLoading,  setHistoriLoading]  = useState(false)
+  const [rekapBayar,      setRekapBayar]      = useState([])
+  const [rekapBayarLoading, setRekapBayarLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   const [nomorRumah,    setNomorRumah]    = useState('')
@@ -97,6 +100,16 @@ export default function RumahPage() {
     } catch {
       addToast({ title: 'Gagal', description: 'Tidak dapat memuat histori', variant: 'destructive' })
     } finally { setHistoriLoading(false) }
+  }
+
+  const openRekapBayar = async (rumah) => {
+    setSelectedRumah(rumah); setRekapBayarOpen(true); setRekapBayarLoading(true)
+    try {
+      const res = await rumahApi.getHistoriPembayaran(rumah.id)
+      setRekapBayar(res.data?.data ?? [])
+    } catch {
+      addToast({ title: 'Gagal', description: 'Tidak dapat memuat rekap pembayaran', variant: 'destructive' })
+    } finally { setRekapBayarLoading(false) }
   }
 
   const filtered = rumahList.filter(r =>
@@ -199,6 +212,10 @@ export default function RumahPage() {
                         <Button id={`btn-histori-${rumah.id}`} variant="ghost" size="sm" onClick={()=>openHistori(rumah)}>
                           <History className="w-3.5 h-3.5" />
                           Histori
+                        </Button>
+                        <Button id={`btn-rekap-bayar-${rumah.id}`} variant="ghost" size="sm" onClick={()=>openRekapBayar(rumah)}>
+                          <Receipt className="w-3.5 h-3.5" />
+                          Rekap Bayar
                         </Button>
                       </div>
                     </TableCell>
@@ -307,6 +324,61 @@ export default function RumahPage() {
                   {i === 0 && !h.tanggal_keluar && <Badge variant="secondary">Aktif</Badge>}
                 </div>
               ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Rekap Pembayaran */}
+      <Dialog open={rekapBayarOpen} onOpenChange={setRekapBayarOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Rekap Pembayaran — Rumah {selectedRumah?.nomor_rumah}</DialogTitle>
+            <DialogDescription>Histori seluruh pembayaran iuran untuk unit rumah ini.</DialogDescription>
+          </DialogHeader>
+          {rekapBayarLoading ? (
+            <div className="space-y-2">{[1,2,3].map(i=><Skeleton key={i} className="h-10 w-full" />)}</div>
+          ) : rekapBayar.length === 0 ? (
+            <div className="py-10 text-center">
+              <Receipt className="w-8 h-8 mx-auto mb-2 text-[hsl(var(--text-muted))] opacity-40" />
+              <p className="text-sm text-[hsl(var(--text-muted))]">Belum ada rekap pembayaran untuk rumah ini.</p>
+            </div>
+          ) : (
+            <div className="max-h-96 overflow-y-auto scrollbar-thin">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Warga</TableHead>
+                    <TableHead>Jenis Iuran</TableHead>
+                    <TableHead>Periode</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Jumlah</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rekapBayar.map(p => (
+                    <TableRow key={p.id}>
+                      <TableCell className="text-sm">{p.warga?.nama_lengkap ?? '—'}</TableCell>
+                      <TableCell>
+                        <Badge variant={p.jenis_iuran === 'satpam' ? 'secondary' : 'outline'} className="capitalize">
+                          {p.jenis_iuran}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-[hsl(var(--text-muted))]">
+                        {BULAN_NAMES[p.bulan]} {p.tahun}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={p.status_pembayaran === 'lunas' ? 'success' : 'warning'} className="capitalize">
+                          {p.status_pembayaran}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-[hsl(var(--success))]">
+                        {formatCurrency(p.jumlah_bayar)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </DialogContent>
